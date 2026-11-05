@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#b91c1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="혈압 다이어리">
+<link rel="manifest" href="manifest.webmanifest">
+<title>혈압 다이어리</title>
+<style>
+:root{--red:#b91c1c;--bg:#f5f6f8;--card:#fff;--ink:#171717;--muted:#737373;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+header{background:var(--red);color:#fff;padding:22px 18px 18px;border-radius:0 0 22px 22px}
+header h1{font-size:23px;margin:0 0 5px}header p{margin:0;opacity:.85;font-size:13px}
+main{max-width:680px;margin:auto;padding:15px}
+.tabs{display:flex;gap:7px;margin:0 0 14px}.tabs button{flex:1;border:0;border-radius:12px;padding:11px 5px;background:#e5e7eb;color:#444;font-weight:700}.tabs button.active{background:var(--red);color:white}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border-radius:17px;padding:16px;margin-bottom:13px;box-shadow:0 2px 10px #00000008}
+h2{font-size:17px;margin:0 0 13px}.sub{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:#fff7f7;border-radius:13px;padding:13px}.stat .label{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:25px;margin-top:4px}.stat small{font-size:11px;color:var(--muted)}
+label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;background:#fff;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.primary{width:100%;border:0;border-radius:12px;background:var(--red);color:white;padding:14px;font-weight:750;font-size:16px;margin-top:14px}
+button.secondary{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px}
+.checkline{display:flex;align-items:center;gap:9px;margin:12px 0}.checkline input{width:20px;height:20px}
+.avgline{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}.avgline:last-child{border:0}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.calendar-head strong{font-size:18px}.calendar-nav{display:flex;gap:7px}.calendar-nav button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 12px;font-size:16px}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.calendar-weekday{font-size:11px;color:var(--muted);padding:5px 0}.calendar-day{position:relative;min-height:43px;border:1px solid transparent;background:#fff;border-radius:10px;color:var(--ink);font-size:14px}.calendar-day.muted{color:#c4c4c4}.calendar-day.selected{background:#b91c1c;color:#fff;border-color:#b91c1c;font-weight:800}.calendar-day.today:not(.selected){border-color:#b91c1c}.calendar-day .dot{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#b91c1c}.calendar-day.selected .dot{background:#fff}.calendar-legend{font-size:11px;color:var(--muted);margin-top:9px}.selected-day{margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}.selected-day h3{font-size:15px;margin:0 0 8px}.day-record{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}.day-record:last-child{border:0}.entry{padding:12px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entrytop{display:flex;justify-content:space-between;gap:10px}.entry strong{font-size:16px}.pill{font-size:11px;background:#f3f4f6;padding:4px 8px;border-radius:20px;color:#555}
+canvas{width:100%;height:210px}
+.notice{font-size:12px;line-height:1.5;color:var(--muted);background:#f8fafc;border-radius:10px;padding:11px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#ffffffed;backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:10px}
+nav button{max-width:210px;flex:1;border:0;background:transparent;padding:8px;color:#666;font-weight:700}nav button.active{color:var(--red)}
+.smallbtn{font-size:12px;color:var(--red);background:none;border:0;padding:4px}
+@media(min-width:600px){header{padding-left:max(18px,calc((100% - 644px)/2))}main{padding-top:20px}}
+</style>
+</head>
+<body>
+<header><h1>♥ 혈압 다이어리</h1><p>아침·저녁 혈압과 생활습관을 함께 기록해요</p></header>
+<main>
+<div class="tabs">
+<button class="active" data-tab="home">요약</button><button data-tab="add">기록하기</button><button data-tab="calendar">달력</button><button data-tab="history">그래프</button>
+</div>
+
+<section id="home" class="panel active">
+<div class="card">
+<h2>오늘의 평균 혈압</h2>
+<div class="grid">
+<div class="stat"><span class="label">수축기 평균</span><strong id="todaySys">—</strong><small>mmHg</small></div>
+<div class="stat"><span class="label">이완기 평균</span><strong id="todayDia">—</strong><small>mmHg</small></div>
+<div class="stat"><span class="label">맥박 평균</span><strong id="todayPulse">—</strong><small>bpm</small></div>
+<div class="stat"><span class="label">오늘 체중</span><strong id="todayWeight">—</strong><small id="todayBmi">BMI —</small></div>
+</div>
+<div style="margin-top:13px">
+<div class="avgline"><span>아침 평균 (2회)</span><b id="morningAvg">—</b></div>
+<div class="avgline"><span>저녁 평균 (2회)</span><b id="eveningAvg">—</b></div>
+<div class="avgline"><span>오늘 음주</span><b id="todayAlcohol">미기록</b></div>
+</div>
+</div>
+<div class="card"><h2>내 신체 정보</h2><div class="row">
+<div><label for="height">키 (cm)</label><input id="height" type="number" inputmode="decimal" placeholder="예: 174"></div>
+<div><label for="goalWeight">목표 체중 (kg, 선택)</label><input id="goalWeight" type="number" inputmode="decimal" placeholder="예: 69"></div>
+</div><button class="secondary" style="margin-top:12px" onclick="saveProfile()">신체 정보 저장</button><p class="sub" id="profileMsg"></p></div>
+<div class="notice">혈압은 측정 전 5분간 안정하고, 등과 팔을 받친 자세에서 측정하세요. 아침·저녁 각각 1분 간격으로 2회 측정한 값을 별도로 입력하면 평균을 계산합니다.</div>
+</section>
+
+<section id="add" class="panel">
+<div class="card">
+<h2>혈압 기록 입력</h2>
+<label for="date">측정 날짜</label><input id="date" type="date">
+<label>측정 시간대</label><select id="period"><option value="아침">아침</option><option value="저녁">저녁</option></select>
+<p class="sub">같은 시간대에 1분 간격으로 측정한 값을 각각 입력하세요. 두 값의 평균은 자동 계산됩니다.</p>
+<div class="row">
+<div><label for="sys1">1차 수축기</label><input id="sys1" type="number" inputmode="numeric" placeholder="예: 135"></div>
+<div><label for="dia1">1차 이완기</label><input id="dia1" type="number" inputmode="numeric" placeholder="예: 88"></div>
+<div><label for="pulse1">1차 맥박</label><input id="pulse1" type="number" inputmode="numeric" placeholder="예: 78"></div>
+</div>
+<div class="row">
+<div><label for="sys2">2차 수축기</label><input id="sys2" type="number" inputmode="numeric" placeholder="예: 130"></div>
+<div><label for="dia2">2차 이완기</label><input id="dia2" type="number" inputmode="numeric" placeholder="예: 84"></div>
+<div><label for="pulse2">2차 맥박</label><input id="pulse2" type="number" inputmode="numeric" placeholder="예: 75"></div>
+</div>
+<label for="weight">체중 (kg, 선택)</label><input id="weight" type="number" inputmode="decimal" step="0.1" placeholder="예: 76.5">
+<div class="checkline"><input id="alcohol" type="checkbox"><label for="alcohol" style="margin:0">오늘 술을 마셨음</label></div>
+<label for="memo">메모 (선택)</label><textarea id="memo" rows="2" placeholder="예: 회식, 수면 부족, 운동 후 등"></textarea>
+<div class="notice" id="preview">두 번의 측정값을 입력하면 시간대 평균이 표시됩니다.</div>
+<button class="primary" onclick="saveEntry()">기록 저장</button>
+</div>
+</section>
+
+<section id="calendar" class="panel">
+<div class="card"><h2>월간 달력</h2>
+<div class="calendar-head"><button class="secondary" onclick="moveMonth(-1)">‹ 이전</button><strong id="calendarMonth"></strong><button class="secondary" onclick="moveMonth(1)">다음 ›</button></div>
+<div class="calendar-grid" id="calendarGrid"></div>
+<div class="calendar-legend">● 기록이 있는 날짜 · 날짜를 누르면 해당 날짜의 기록을 확인할 수 있어요.</div>
+<div class="selected-day" id="selectedDay"></div>
+</div>
+</section>
+
+<section id="history" class="panel">
+<div class="card"><h2>혈압 변화</h2><canvas id="bpChart" width="600" height="220"></canvas><p class="sub">날짜별 하루 평균 수축기·이완기 혈압</p></div>
+<div class="card"><h2>체중 변화</h2><canvas id="weightChart" width="600" height="220"></canvas></div>
+<div class="card"><h2>기록 내역</h2><div id="entries"></div></div>
+<div class="card"><button class="secondary" onclick="exportCSV()">CSV 내보내기</button> <button class="secondary" onclick="clearAll()">전체 기록 삭제</button></div>
+</section>
+</main>
+<nav><button class="active" data-tab="home">⌂ 요약</button><button data-tab="add">＋ 기록</button><button data-tab="calendar">▦ 달력</button><button data-tab="history">▥ 그래프</button></nav>
+<script>
+const $=id=>document.getElementById(id);
+let entries=JSON.parse(localStorage.getItem('bpDiaryEntries')||'[]');
+let profile=JSON.parse(localStorage.getItem('bpDiaryProfile')||'{}');
+let calendarDate=new Date();calendarDate.setDate(1);let selectedDate=today();
+const today=()=>new Date().toLocaleDateString('sv-SE');
+$('date').value=today();
+$('height').value=profile.height||'';
+$('goalWeight').value=profile.goalWeight||'';
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+function showTab(tab){document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===tab));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));if(tab==='home')renderHome();if(tab==='calendar')renderCalendar();if(tab==='history')renderHistory();}
+function saveProfile(){profile={height:Number($('height').value)||null,goalWeight:Number($('goalWeight').value)||null};localStorage.setItem('bpDiaryProfile',JSON.stringify(profile));$('profileMsg').textContent='저장했어요.';renderHome();}
+function num(id){return Number($(id).value)}
+function avg(a,b){return Math.round((a+b)/2*10)/10}
+['sys1','dia1','pulse1','sys2','dia2','pulse2'].forEach(id=>$(id).addEventListener('input',preview));
+function preview(){let ids=['sys1','dia1','pulse1','sys2','dia2','pulse2'];if(ids.every(id=>$(id).value.trim()!=='')){ $('preview').textContent=`입력한 두 측정 평균: ${avg(num('sys1'),num('sys2'))}/${avg(num('dia1'),num('dia2'))} mmHg · 맥박 ${avg(num('pulse1'),num('pulse2'))} bpm`;}}
+function saveEntry(){
+ const ids=['sys1','dia1','pulse1','sys2','dia2','pulse2'];if(ids.some(id=>!$(id).value.trim())){alert('두 번의 혈압과 맥박을 모두 입력해 주세요.');return;}
+ const vals=ids.map(num);if(vals.some(v=>!Number.isFinite(v)||v<=0)){alert('측정값을 올바르게 입력해 주세요.');return;}
+ const item={id:crypto.randomUUID(),date:$('date').value,period:$('period').value,sys:avg(vals[0],vals[3]),dia:avg(vals[1],vals[4]),pulse:avg(vals[2],vals[5]),sys1:vals[0],dia1:vals[1],pulse1:vals[2],sys2:vals[3],dia2:vals[4],pulse2:vals[5],weight:$('weight').value?Number($('weight').value):null,alcohol:$('alcohol').checked,memo:$('memo').value.trim()};
+ entries=entries.filter(e=>!(e.date===item.date&&e.period===item.period));entries.push(item);entries.sort((a,b)=>a.date.localeCompare(b.date)||a.period.localeCompare(b.period));localStorage.setItem('bpDiaryEntries',JSON.stringify(entries));
+ ['sys1','dia1','pulse1','sys2','dia2','pulse2','weight','memo'].forEach(id=>$(id).value='');$('alcohol').checked=false;showTab('home');alert('저장했습니다. 같은 날짜·시간대 기록이 있으면 새 기록으로 교체됩니다.');
+}
+function bmi(w){let h=Number(profile.height)/100;return w&&h>0?(w/(h*h)).toFixed(1):'—'}
+function dayEntries(d){return entries.filter(e=>e.date===d)}
+function mean(list,key){return list.length?(list.reduce((s,e)=>s+e[key],0)/list.length).toFixed(1):'—'}
+function renderHome(){let t=dayEntries(today()),m=t.filter(e=>e.period==='아침'),n=t.filter(e=>e.period==='저녁');$('morningAvg').textContent=m.length?`${mean(m,'sys')}/${mean(m,'dia')} · 맥박 ${mean(m,'pulse')}`:'—';$('eveningAvg').textContent=n.length?`${mean(n,'sys')}/${mean(n,'dia')} · 맥박 ${mean(n,'pulse')}`:'—';
+let valid=t.filter(e=>e.sys&&e.dia);$('todaySys').textContent=valid.length?mean(valid,'sys'):'—';$('todayDia').textContent=valid.length?mean(valid,'dia'):'—';$('todayPulse').textContent=valid.length?mean(valid,'pulse'):'—';
+let w=[...t].reverse().find(e=>e.weight)?.weight;$('todayWeight').textContent=w?`${w.toFixed(1)}`:'—';$('todayBmi').textContent=`BMI ${bmi(w)}`;$('todayAlcohol').textContent=t.length?(t.some(e=>e.alcohol)?'음주':'음주 체크 안 됨'):'미기록';}
+function renderHistory(){renderList();drawChart('bpChart','bp');drawChart('weightChart','weight');}
+
+function dateKey(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function moveMonth(delta){calendarDate.setMonth(calendarDate.getMonth()+delta);renderCalendar();}
+function selectCalendarDate(date){selectedDate=date;renderCalendar();}
+function renderCalendar(){
+ const y=calendarDate.getFullYear(),m=calendarDate.getMonth();
+ $('calendarMonth').textContent=`${y}년 ${m+1}월`;
+ const first=new Date(y,m,1),start=first.getDay(),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
+ const recorded=new Set(entries.map(e=>e.date));
+ const weekdays=['일','월','화','수','목','금','토'];
+ let html=weekdays.map(w=>`<div class="calendar-weekday">${w}</div>`).join('');
+ for(let i=0;i<42;i++){
+  let day,monthOffset=0;
+  if(i<start){day=prevDays-start+i+1;monthOffset=-1;}
+  else if(i>=start+days){day=i-(start+days)+1;monthOffset=1;}
+  else day=i-start+1;
+  const dt=new Date(y,m+monthOffset,day),key=dateKey(dt.getFullYear(),dt.getMonth(),dt.getDate());
+  const classes=['calendar-day'];if(monthOffset)classes.push('muted');if(key===selectedDate)classes.push('selected');if(key===today())classes.push('today');
+  html+=`<button class="${classes.join(' ')}" onclick="selectCalendarDate('${key}')">${day}${recorded.has(key)?'<i class="dot"></i>':''}</button>`;
+ }
+ $('calendarGrid').innerHTML=html;
+ const list=dayEntries(selectedDate).sort((a,b)=>a.period.localeCompare(b.period));
+ $('selectedDay').innerHTML=`<h3>${selectedDate} 기록</h3>`+(list.length?list.map(e=>`<div class="day-record"><b>${e.period}</b> · ${e.sys}/${e.dia} mmHg · 맥박 ${e.pulse} bpm${e.weight?` · ${e.weight.toFixed(1)} kg`:''}${e.alcohol?' · 음주':''}${e.memo?`<div class="sub">${escapeHtml(e.memo)}</div>`:''}</div>`).join(''):'<p class="sub">이 날짜에는 저장된 기록이 없습니다.</p>')+`<button class="secondary" style="margin-top:10px" onclick="addForSelectedDate()">이 날짜 기록하기</button>`;
+}
+function addForSelectedDate(){$('date').value=selectedDate;showTab('add');}
+
+function renderList(){let el=$('entries');if(!entries.length){el.innerHTML='<p class="sub">아직 기록이 없습니다.</p>';return;}el.innerHTML=[...entries].reverse().map(e=>`<div class="entry"><div class="entrytop"><strong>${e.date} · ${e.period}</strong><button class="smallbtn" onclick="removeEntry('${e.id}')">삭제</button></div><div>${e.sys}/${e.dia} mmHg · 맥박 ${e.pulse}</div><div class="sub">${e.weight?e.weight.toFixed(1)+' kg · BMI '+bmi(e.weight)+' · ':''}${e.alcohol?'음주':'금주'}${e.memo?' · '+escapeHtml(e.memo):''}</div></div>`).join('');}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function removeEntry(id){if(confirm('이 기록을 삭제할까요?')){entries=entries.filter(e=>e.id!==id);localStorage.setItem('bpDiaryEntries',JSON.stringify(entries));renderHistory();renderHome();}}
+function daily(){let dates=[...new Set(entries.map(e=>e.date))].sort();return dates.map(d=>{let a=dayEntries(d);return {date:d,sys:a.length?a.reduce((s,e)=>s+e.sys,0)/a.length:null,dia:a.length?a.reduce((s,e)=>s+e.dia,0)/a.length:null,weight:[...a].reverse().find(e=>e.weight)?.weight??null};});}
+function drawChart(id,type){let c=$(id),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let data=daily().filter(d=>type==='bp'?d.sys!==null:d.weight!==null);if(!data.length){ctx.fillStyle='#777';ctx.font='16px sans-serif';ctx.fillText('기록이 쌓이면 그래프가 표시됩니다.',20,105);return;}
+let vals=type==='bp'?data.flatMap(d=>[d.sys,d.dia]):data.map(d=>d.weight),min=Math.min(...vals)-5,max=Math.max(...vals)+5;if(max===min)max=min+10;let x=i=>40+i*(w-75)/Math.max(1,data.length-1),y=v=>h-35-(v-min)*(h-65)/(max-min);
+ctx.strokeStyle='#e5e7eb';ctx.fillStyle='#777';ctx.font='12px sans-serif';for(let k=0;k<4;k++){let yy=20+k*(h-55)/3;ctx.beginPath();ctx.moveTo(35,yy);ctx.lineTo(w-15,yy);ctx.stroke();}
+function line(key,color){ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();data.forEach((d,i)=>{let v=d[key];if(i===0)ctx.moveTo(x(i),y(v));else ctx.lineTo(x(i),y(v));});ctx.stroke();data.forEach((d,i)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(x(i),y(d[key]),4,0,Math.PI*2);ctx.fill();});}
+if(type==='bp'){line('sys','#b91c1c');line('dia','#2563eb');}else line('weight','#16a34a');
+ctx.fillStyle='#666';data.forEach((d,i)=>{if(i%Math.max(1,Math.ceil(data.length/5))===0||i===data.length-1)ctx.fillText(d.date.slice(5),x(i)-13,h-10);});
+}
+function exportCSV(){if(!entries.length){alert('내보낼 기록이 없습니다.');return;}let rows=[['날짜','시간대','1차 수축기','1차 이완기','1차 맥박','2차 수축기','2차 이완기','2차 맥박','시간대평균 수축기','시간대평균 이완기','시간대평균 맥박','체중kg','BMI','음주','메모']];entries.forEach(e=>rows.push([e.date,e.period,e.sys1,e.dia1,e.pulse1,e.sys2,e.dia2,e.pulse2,e.sys,e.dia,e.pulse,e.weight??'',e.weight?bmi(e.weight):'',e.alcohol?'음주':'금주',e.memo]));let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='혈압기록.csv';a.click();URL.revokeObjectURL(a.href);}
+function clearAll(){if(confirm('모든 혈압·체중 기록을 삭제할까요? 되돌릴 수 없습니다.')){entries=[];localStorage.removeItem('bpDiaryEntries');renderHome();renderHistory();}}
+renderHome();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
